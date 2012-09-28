@@ -1,0 +1,3 @@
+[submodule "XeroPy"]
+	path = XeroPy
+	url = git@github.com:russss/XeroPy.git

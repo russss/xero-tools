@@ -1,0 +1,14 @@
+[xero]
+consumer_key=
+consumer_secret=
+private_key_file=privatekey.pem
+sales_account=200
+commission_account=405
+gocardless_account=GOCARDLESS
+
+[gocardless]
+environment=production
+app_id=
+app_secret=
+access_token=
+merchant_id=
