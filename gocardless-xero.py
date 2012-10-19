@@ -7,7 +7,7 @@ from ConfigParser import ConfigParser
 from xero import Xero
 import gocardless
 
-date_cutoff = datetime.now() - timedelta(days=150)
+date_cutoff = datetime.now() - timedelta(days=300)
 gcid_regex = re.compile(r'\(GCID: ([0-9A-Z]+)\)')
 
 class GoCardlessPaymentImporter(object):
@@ -33,7 +33,7 @@ class GoCardlessPaymentImporter(object):
         print "Submitted %s new journal entries" % len(to_submit)
 
     def get_posted_journals(self):
-        existing_journals = self.xero.manualjournals.filter(Since=date_cutoff)
+        existing_journals = self.xero.manualjournals.filter(Since=date_cutoff, Status='POSTED')
         if existing_journals is not None:
             if not isinstance(existing_journals, (list, tuple)):
                 existing_journals = [existing_journals]
@@ -50,11 +50,11 @@ class GoCardlessPaymentImporter(object):
             'Status': 'POSTED',
             'Date': bill.paid_at.isoformat(),
             'JournalLines': [
-                { 'LineAmount': str(Decimal(bill.amount) - Decimal(bill.gocardless_fees)),
+                { 'LineAmount': str(-(Decimal(bill.amount))),
                                 'AccountCode': self.config.get('xero', 'sales_account') },
-                { 'LineAmount': str(bill.gocardless_fees), 
+                { 'LineAmount': str(Decimal(bill.gocardless_fees)), 
                                 'AccountCode': self.config.get('xero', 'commission_account') },
-                { 'LineAmount': str(-Decimal(bill.amount)),
+                { 'LineAmount': str(Decimal(bill.amount) - Decimal(bill.gocardless_fees)),
                                 'AccountCode': self.config.get('xero', 'gocardless_account') }
                 ]
             }
