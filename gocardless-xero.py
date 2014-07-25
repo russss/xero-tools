@@ -54,12 +54,12 @@ class GoCardlessPaymentImporter(object):
             'Date': payout.paid_at.isoformat(),
             'LineAmountTypes': 'Inclusive',
             'JournalLines': [
-                {'LineAmount': str(-(Decimal(payout.amount))),
+                {'LineAmount': str(-(Decimal(payout.amount)) - Decimal(payout.transaction_fees)),
                  'AccountCode': self.config.get('xero', 'sales_account')},
                 {'LineAmount': str(Decimal(payout.transaction_fees)),
                  'AccountCode': self.config.get('xero', 'commission_account'),
                  'TaxType': 'EXEMPTINPUT'},
-                {'LineAmount': str(Decimal(payout.amount) - Decimal(payout.transaction_fees)),
+                {'LineAmount': str(Decimal(payout.amount)),
                  'AccountCode': self.config.get('xero', 'gocardless_account')}
             ]}
 
