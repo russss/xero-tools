@@ -26,4 +26,8 @@ pip-log.txt
 #Mr Developer
 .mr.developer.cfg
 
+env
 xero-tools.cfg
+
+*.pem
+*.cer
