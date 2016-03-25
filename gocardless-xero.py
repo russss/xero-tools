@@ -48,20 +48,25 @@ class GoCardlessPaymentImporter(object):
 
     def parse_gocardless_payout(self, payout):
         """ Convert a GoCardless payout object into a JSON representation of the Xero journal XML. """
+        journal_lines = [
+                {'LineAmount': str(-(Decimal(payout.amount)) - Decimal(payout.transaction_fees)),
+                 'AccountCode': self.config.get('xero', 'sales_account')},
+                {'LineAmount': str(Decimal(payout.amount)),
+                 'AccountCode': self.config.get('xero', 'gocardless_account')}
+            ]
+
+        # Only add a transaction fees line if there are fees to pay
+        if Decimal(payout.transaction_fees) > 0:
+            journal_lines.append({'LineAmount': str(Decimal(payout.transaction_fees)),
+                 'AccountCode': self.config.get('xero', 'commission_account'),
+                 'TaxType': 'EXEMPTINPUT'})
+
         return {
             'Narration': "GoCardless payout %s" % payout.id,
             'Status': 'POSTED',
             'Date': payout.paid_at.isoformat(),
             'LineAmountTypes': 'Inclusive',
-            'JournalLines': [
-                {'LineAmount': str(-(Decimal(payout.amount)) - Decimal(payout.transaction_fees)),
-                 'AccountCode': self.config.get('xero', 'sales_account')},
-                {'LineAmount': str(Decimal(payout.transaction_fees)),
-                 'AccountCode': self.config.get('xero', 'commission_account'),
-                 'TaxType': 'EXEMPTINPUT'},
-                {'LineAmount': str(Decimal(payout.amount)),
-                 'AccountCode': self.config.get('xero', 'gocardless_account')}
-            ]}
+            'JournalLines': journal_lines}
 
     def get_journals_to_submit(self, posted_journals):
         for payout in self.gc_client.merchant().payouts():
