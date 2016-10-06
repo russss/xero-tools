@@ -72,7 +72,8 @@ class GoCardlessPaymentImporter(object):
         for payout in self.gc_client.merchant().payouts():
             if (payout.paid_at < datetime.now() and payout.paid_at > date_cutoff
                     and payout.id not in posted_journals):
-                yield self.parse_gocardless_payout(payout)
+                if payout.currency == 'GBP':
+                    yield self.parse_gocardless_payout(payout)
 
     def submit_journals(self, to_submit):
         for start in range(0, len(to_submit), 100):
